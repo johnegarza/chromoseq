@@ -5,20 +5,20 @@ workflow ChromoSeq {
   String Name
   String OutputDir
 
-  String Translocations = "/opt/files/ChromoSeq.translocations.fixed.v2.sorted.hg38.bedpe"
-  String SVBed = "/opt/files/ChromoSeq.translocations.qc.bed"
-  String Cytobands = "/opt/files/ChromoSeq.hg38.bed"
-  String CoverageBed = "/opt/files/GeneCoverageRegions.bed"
-  String MantaConfig = "/opt/files/configManta.hg38.py.ini"
-  String SVDB = "/opt/files/B38.callset.public.bedpe.gz"
+  String Translocations = "/persist/ChromoSeq.translocations.fixed.v2.sorted.hg38.bedpe"
+  String SVBed = "/persist/ChromoSeq.translocations.qc.bed"
+  String Cytobands = "/persist/ChromoSeq.hg38.bed"
+  String CoverageBed = "/persist/GeneCoverageRegions.bed"
+  String MantaConfig = "/persist/configManta.hg38.py.ini"
+  String SVDB = "/persist/B38.callset.public.bedpe.gz"
 
-  String Blacklist = "/opt/files/hg38.blacklist.merged.bed"
+  String Blacklist = "/persist/hg38.blacklist.merged.bed"
     
-  String Reference = "/opt/files/all_sequences.fa"
-  String ReferenceIndex = "/opt/files/all_sequences.fa.fai"
-  String ReferenceBED = "/opt/files/all_sequences.fa.bed.gz"
-  String Dictionary = "/opt/files/all_sequences.dict"
-  String VEP = "/opt/files"
+  String Reference = "/persist/all_sequences.fa"
+  String ReferenceIndex = "/persist/all_sequences.fa.fai"
+  String ReferenceBED = "/persist/all_sequences.fa.bed.gz"
+  String Dictionary = "/persist/all_sequences.dict"
+  String VEP = "/persist"
 
   Float minVarFreq=0.05
   
@@ -204,7 +204,7 @@ task run_manta {
   String SVAnnot
   
   command <<<
-    /usr/local/src/manta/bin/configManta.py --config=/opt/files/configManta.hg38.py.ini --tumorBam=${Bam} --referenceFasta=${Reference} \
+    /usr/local/src/manta/bin/configManta.py --config=/persist/configManta.hg38.py.ini --tumorBam=${Bam} --referenceFasta=${Reference} \
     --runDir=manta --callRegions=${ReferenceBED} --outputContig && \
     ./manta/runWorkflow.py -m local -q research-hpc -j 4 -g 32 && \
     /opt/conda/envs/python2/bin/python /usr/local/src/manta/libexec/convertInversion.py /usr/local/bin/samtools ${Reference} ./manta/results/variants/tumorSV.vcf.gz | \
@@ -246,7 +246,7 @@ task run_ichor {
     --gcWig /usr/local/lib/R/site-library/ichorCNA/extdata/gc_hg38_500kb.wig \
     --mapWig /usr/local/lib/R/site-library/ichorCNA/extdata/map_hg38_500kb.wig \
     --centromere /usr/local/lib/R/site-library/ichorCNA/extdata/GRCh38.GCA_000001405.2_centromere_acen.txt \
-    --normalPanel /opt/files/nextera_hg38_500kb_median_normAutosome_median.rds_median.n9.rds \
+    --normalPanel /persist/nextera_hg38_500kb_median_normAutosome_median.rds_median.n9.rds \
     --includeHOMD False --chrs "c(1:22, \"X\")" --chrTrain "c(1:22)" --fracReadsInChrYForMale 0.0005 \
     --estimateNormal True --estimatePloidy True --estimateScPrevalence True \
     --txnE 0.999999 --txnStrength 1000000 --genomeStyle UCSC --outDir ./ && \
@@ -544,7 +544,7 @@ task make_igv {
   }
   
   runtime {
-    docker: "registry.gsc.wustl.edu/genome/lims-compute-xenial:1"
+    docker: "ubuntu:xenial"
   }
   
   output {

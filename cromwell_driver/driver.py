@@ -2,8 +2,11 @@
 
 import glob, json, os, subprocess, sys
 
-#most files are in /opt/files, so switch to it and use as a working directory
-os.chdir('/opt/files')
+#manage some large files
+#reference fasta is too large for github; thus it's stored in the base image as a compressed file to save space, but this means it must be 
+#de-compressed before use; to avoid doing this in every cromwell-spawned child container, decompress here then mount it in the child containers
+#vep cache is too large to even store in the image, so download it once here in the base container then mount in child containers
+os.chdir('/persist')
 
 #decompress reference fasta file
 print('Decompressing reference fasta...')
@@ -57,10 +60,8 @@ wf_inputs_dict = \
     "ChromoSeq.OutputDir": output_dir
 }
 
-with open("/opt/files/inputs.json", "w+") as f:
+with open("/opt/inputs.json", "w+") as f:
     json.dump(wf_inputs_dict, f)
-
-
 
 #create metadata file required by basespace for upload; each workflow generated ouput file is tagged
 #with the downloaded basespace file(s) used to generate it
@@ -89,6 +90,6 @@ with open(metadata_outfile, "w+") as f:
     json.dump(metadata_json_template, f)
 
 print('\nLaunching cromwell')
-cromwell_cmd = ["/usr/bin/java", "-Dconfig.file=/opt/files/basespace_cromwell.config", "-jar", "/opt/cromwell-36.jar", "run", "-t", "wdl", "-i", "/opt/files/inputs.json", "/opt/files/Chromoseq.v8.cromwell34.hg38.wdl"]
+cromwell_cmd = ["/usr/bin/java", "-Dconfig.file=/opt/basespace_cromwell.config", "-jar", "/opt/cromwell-36.jar", "run", "-t", "wdl", "-i", "/opt/inputs.json", "/opt/Chromoseq.v8.cromwell34.hg38.wdl"]
 subprocess.check_call(cromwell_cmd)
 print('\nCromwell complete')
